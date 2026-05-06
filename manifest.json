@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "Dictionary Extension",
+  "version": "1.0",
+  "description": "Save dictionary definitions of selected words to Notion using https://dictionaryapi.dev/",
+  "permissions": ["activeTab", "scripting"],
+  "action": {
+    "default_icon": "images/dictionary.png"
+  },
+  "host_permissions": [
+      "https://api.notion.com/*",
+      "https://api.dictionaryapi.dev/*",
+      "<all_urls>"
+  ],
+  "background": {
+      "service_worker": "background.js"
+  },
+  "content_scripts": [
+      {
+          "matches": ["<all_urls>"],
+          "js": ["scripts/content.js"]
+      }
+  ]
+}
