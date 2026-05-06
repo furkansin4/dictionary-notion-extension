@@ -39,7 +39,7 @@ async function fetchWord(word) {
             word: entry.word,
             pronounce: audioUrl,
             pos: [...new Set(pos)].join(", "),
-            definitions: definitionBlocks.join("\n\n"),  // bloklar arası boş satır
+            definitions: definitionBlocks.join("\n\n"),
             synonyms: [...new Set(synonyms)].join(", "),
             antonyms: [...new Set(antonyms)].join(", ")
         };
