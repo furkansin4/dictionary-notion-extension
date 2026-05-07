@@ -20,5 +20,11 @@
           "matches": ["<all_urls>"],
           "js": ["scripts/content.js"]
       }
+  ],
+  "web_accessible_resources": [
+      {
+          "resources": ["images/*.png"],
+          "matches": ["<all_urls>"]
+      }
   ]
 }
