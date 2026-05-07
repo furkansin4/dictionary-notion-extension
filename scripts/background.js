@@ -1,6 +1,8 @@
-const DATABASE_ID = "YOUR_NOTION_DATABASE_ID"  
-const NOTION_TOKEN = "YOUR_NOTION_API_KEY"
-
+function getCredentials() {
+    return new Promise((resolve) => {
+        chrome.storage.sync.get(["notionToken", "databaseId"], resolve);
+    });
+}
 
 async function fetchWord(word) {
     try {
@@ -80,11 +82,11 @@ function toNotionProperties(wordData) {
 }
 
 // Search for word in Notion DB, return true if found
-async function wordExists(word) {
-    const response = await fetch(`https://api.notion.com/v1/databases/${DATABASE_ID}/query`, {
+async function wordExists(word, notionToken, databaseId) {
+    const response = await fetch(`https://api.notion.com/v1/databases/${databaseId}/query`, {
         method: 'POST',
         headers: {
-            'Authorization': `Bearer ${NOTION_TOKEN}`,
+            'Authorization': `Bearer ${notionToken}`,
             'Content-Type': 'application/json',
             'Notion-Version': '2022-06-28'
         },
@@ -102,17 +104,26 @@ async function wordExists(word) {
     return data.results && data.results.length > 0;
 }
 
+function friendlyNotionError(status, message = "") {
+    if (status === 401) return "Invalid token — check your credentials.";
+    if (status === 404) return "Database not found — check your Database ID.";
+    if (message.includes("database_id") || message.includes("parent")) {
+        return "Invalid Database ID — check your credentials.";
+    }
+    return "Couldn't save to Notion — check your credentials.";
+}
+
 // Add new row to Notion
-async function addWord(properties) {
+async function addWord(properties, notionToken, databaseId) {
     const response = await fetch('https://api.notion.com/v1/pages', {
         method: 'POST',
         headers: {
-            'Authorization': `Bearer ${NOTION_TOKEN}`,
+            'Authorization': `Bearer ${notionToken}`,
             'Content-Type': 'application/json',
             'Notion-Version': '2022-06-28'
         },
         body: JSON.stringify({
-            parent: { database_id: DATABASE_ID },
+            parent: { database_id: databaseId },
             properties: properties
         })
     });
@@ -120,15 +131,21 @@ async function addWord(properties) {
     const data = await response.json();
     if (!response.ok) {
         console.error('Notion API error:', data);
-        throw new Error(data.message || 'Notion request failed');
+        throw new Error(friendlyNotionError(response.status, data.message || ""));
     }
     return data;
 }
 
 // Pipeline: word → duplicate check → dictionary API → Notion
 async function saveWord(word) {
+    const { notionToken, databaseId } = await getCredentials();
+
+    if (!notionToken || !databaseId) {
+        return { success: false, error: "Notion is not configured. Click the extension icon to set up your credentials." };
+    }
+
     try {
-        const exists = await wordExists(word);
+        const exists = await wordExists(word, notionToken, databaseId);
         if (exists) {
             return { success: false, duplicate: true };
         }
@@ -143,7 +160,7 @@ async function saveWord(word) {
     
     try {
         const properties = toNotionProperties(wordData);
-        await addWord(properties);
+        await addWord(properties, notionToken, databaseId);
         return { success: true };
     } catch (error) {
         return { success: false, error: error.message };

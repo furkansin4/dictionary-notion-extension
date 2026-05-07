@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dictionary Extension</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      width: 320px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+    }
+
+    .header {
+      background: #fff;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 18px 20px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-icon {
+      width: 32px;
+      height: 32px;
+      background: #0f172a;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .header-icon svg {
+      width: 18px;
+      height: 18px;
+      fill: #fff;
+    }
+
+    .header-text h1 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.2;
+    }
+
+    .header-text p {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 1px;
+    }
+
+    /* ── SETUP VIEW ── */
+    #setup-view {
+      padding: 20px;
+    }
+
+    .setup-intro {
+      font-size: 12.5px;
+      color: #64748b;
+      line-height: 1.55;
+      margin-bottom: 18px;
+    }
+
+    .field {
+      margin-bottom: 14px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .field input {
+      width: 100%;
+      padding: 9px 11px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 12.5px;
+      color: #1e293b;
+      background: #fff;
+      outline: none;
+      transition: border-color 0.15s;
+      font-family: "SF Mono", "Fira Code", monospace;
+    }
+
+    .field input::placeholder {
+      color: #cbd5e1;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .field input:focus {
+      border-color: #6366f1;
+    }
+
+    .save-btn {
+      width: 100%;
+      padding: 10px;
+      background: #0f172a;
+      color: #fff;
+      border: none;
+      border-radius: 9px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 4px;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .save-btn:hover {
+      background: #1e293b;
+    }
+
+    .save-btn:active {
+      transform: scale(0.98);
+    }
+
+    .error-msg {
+      font-size: 11.5px;
+      color: #dc2626;
+      margin-top: 8px;
+      display: none;
+      text-align: center;
+    }
+
+    /* ── CONNECTED VIEW ── */
+    #connected-view {
+      padding: 20px;
+      display: none;
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #f0fdf4;
+      border: 1.5px solid #bbf7d0;
+      border-radius: 10px;
+      padding: 10px 13px;
+      margin-bottom: 16px;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .status-badge--error {
+      background: #fff1f2;
+      border-color: #fecaca;
+    }
+
+    .status-badge--verifying {
+      background: #f8fafc;
+      border-color: #e2e8f0;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      flex-shrink: 0;
+      transition: background 0.2s;
+    }
+
+    .status-badge--error .status-dot {
+      background: #ef4444;
+    }
+
+    .status-badge--verifying .status-dot {
+      background: #94a3b8;
+    }
+
+    .status-text {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #166534;
+      transition: color 0.2s;
+    }
+
+    .status-badge--error .status-text {
+      color: #b91c1c;
+    }
+
+    .status-badge--verifying .status-text {
+      color: #64748b;
+    }
+
+    .credential-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #fff;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 9px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+    }
+
+    .credential-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .credential-value {
+      font-size: 12px;
+      color: #475569;
+      font-family: "SF Mono", "Fira Code", monospace;
+    }
+
+    .edit-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      transition: background 0.12s;
+    }
+
+    .edit-btn:hover {
+      background: #f1f5f9;
+    }
+
+    .edit-btn svg {
+      width: 15px;
+      height: 15px;
+      stroke: #94a3b8;
+    }
+
+    .reset-btn {
+      width: 100%;
+      padding: 9px;
+      background: transparent;
+      color: #dc2626;
+      border: 1.5px solid #fecaca;
+      border-radius: 9px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 4px;
+      transition: background 0.15s;
+    }
+
+    .reset-btn:hover {
+      background: #fff1f2;
+    }
+
+    .divider {
+      height: 1px;
+      background: #e2e8f0;
+      margin: 14px 0;
+    }
+
+    .hint {
+      font-size: 11px;
+      color: #94a3b8;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    .hint a {
+      color: #6366f1;
+      text-decoration: none;
+    }
+
+    .hint a:hover {
+      text-decoration: underline;
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="header-icon">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4 4h16v2H4zm0 4h10v2H4zm0 4h16v2H4zm0 4h10v2H4z"/>
+      </svg>
+    </div>
+    <div class="header-text">
+      <h1>Dictionary Extension</h1>
+      <p>Save words to Notion</p>
+    </div>
+  </div>
+
+  <!-- SETUP VIEW -->
+  <div id="setup-view">
+    <p class="setup-intro">
+      Connect your Notion workspace to start saving words. You'll need an integration token and a database ID.
+    </p>
+
+    <div class="field">
+      <label>Notion Token</label>
+      <input type="password" id="notion-token" placeholder="secret_xxxxxxxxxxxx" />
+    </div>
+
+    <div class="field">
+      <label>Database ID</label>
+      <input type="text" id="database-id" placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" />
+    </div>
+
+    <button class="save-btn" id="save-btn">Connect to Notion</button>
+    <p class="error-msg" id="error-msg">Please fill in both fields.</p>
+
+    <div class="divider"></div>
+    <p class="hint">
+      Need help? <a href="https://www.notion.so/my-integrations" target="_blank">Create an integration</a> on Notion.<br>
+      Then open your database as full page and <a href="https://developers.notion.com/guides/get-started/quick-start#give-your-connection-page-permissions" target="_blank">add your integration</a> as a connection.
+    </p>
+  </div>
+
+  <!-- CONNECTED VIEW -->
+  <div id="connected-view">
+    <div class="status-badge" id="status-badge">
+      <div class="status-dot" id="status-dot"></div>
+      <span class="status-text" id="status-text">Connected to Notion</span>
+    </div>
+
+    <div class="credential-row">
+      <div>
+        <span class="credential-label">Notion Token</span>
+        <span class="credential-value" id="display-token">secret_••••••••</span>
+      </div>
+      <button class="edit-btn" id="edit-token-btn" title="Edit token">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="credential-row">
+      <div>
+        <span class="credential-label">Database ID</span>
+        <span class="credential-value" id="display-db">xxxxxxxx…</span>
+      </div>
+      <button class="edit-btn" id="edit-db-btn" title="Edit database ID">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/>
+        </svg>
+      </button>
+    </div>
+
+    <button class="reset-btn" id="reset-btn">Disconnect</button>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

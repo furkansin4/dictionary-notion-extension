@@ -105,11 +105,29 @@ function showNotification(type, word) {
         toast.style.transform = "translateY(0)";
     });
 
-    setTimeout(() => {
-        toast.style.opacity = "0";
-        toast.style.transform = "translateY(8px)";
-        setTimeout(() => toast.remove(), 280);
-    }, 2600);
+    let dismissTimer;
+    let isHovered = false;
+
+    function startDismiss() {
+        dismissTimer = setTimeout(() => {
+            if (isHovered) return;
+            toast.style.opacity = "0";
+            toast.style.transform = "translateY(8px)";
+            setTimeout(() => toast.remove(), 280);
+        }, 2600);
+    }
+
+    toast.addEventListener("mouseenter", () => {
+        isHovered = true;
+        clearTimeout(dismissTimer);
+    });
+
+    toast.addEventListener("mouseleave", () => {
+        isHovered = false;
+        startDismiss();
+    });
+
+    startDismiss();
 }
 
 document.addEventListener("mouseup", function (e) {
