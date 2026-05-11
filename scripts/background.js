@@ -1,7 +1,28 @@
 function getCredentials() {
     return new Promise((resolve) => {
-        chrome.storage.sync.get(["notionToken", "databaseId"], resolve);
+        chrome.storage.sync.get(["notionToken", "databaseId", "targetLang"], resolve);
     });
+}
+
+async function fetchTranslation(word, targetLang) {
+    if (!targetLang) return "";
+    try {
+        const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(word.trim())}&langpair=en%7C${targetLang}`;
+        console.log("[Translation] Fetching:", url);
+        const response = await fetch(url);
+        if (!response.ok) {
+            console.error("[Translation] HTTP error:", response.status);
+            return "";
+        }
+        const json = await response.json();
+        console.log("[Translation] Response:", json);
+        const translatedText = json.responseData?.translatedText ?? "";
+        console.log("[Translation] Result:", translatedText);
+        return translatedText;
+    } catch (err) {
+        console.error("[Translation] Fetch failed:", err);
+        return "";
+    }
 }
 
 async function fetchWord(word) {
@@ -62,6 +83,9 @@ function toNotionProperties(wordData) {
     return {
         word: {
             title: [{ text: { content: truncate(wordData.word, 100) } }]
+        },
+        translation: {
+            rich_text: [{ text: { content: truncate(wordData.translation) } }]
         },
         pronounce: {
             rich_text: [{ text: { content: truncate(wordData.pronounce) } }]
@@ -136,9 +160,9 @@ async function addWord(properties, notionToken, databaseId) {
     return data;
 }
 
-// Pipeline: word → duplicate check → dictionary API → Notion
+// Pipeline: word → duplicate check → dictionary API → translation API → Notion
 async function saveWord(word) {
-    const { notionToken, databaseId } = await getCredentials();
+    const { notionToken, databaseId, targetLang } = await getCredentials();
 
     if (!notionToken || !databaseId) {
         return { success: false, error: "Notion is not configured. Click the extension icon to set up your credentials." };
@@ -157,6 +181,8 @@ async function saveWord(word) {
     if (!wordData) {
         return { success: false, error: `"${word}" not found in dictionary` };
     }
+
+    wordData.translation = await fetchTranslation(word, targetLang);
     
     try {
         const properties = toNotionProperties(wordData);
@@ -167,10 +193,50 @@ async function saveWord(word) {
     }
 }
 
+// Create a new Notion database with the required schema under the given parent page
+async function createDatabase(notionToken, pageId) {
+    const response = await fetch("https://api.notion.com/v1/databases", {
+        method: "POST",
+        headers: {
+            "Authorization": `Bearer ${notionToken}`,
+            "Content-Type": "application/json",
+            "Notion-Version": "2022-06-28"
+        },
+        body: JSON.stringify({
+            parent: { type: "page_id", page_id: pageId },
+            title: [{ type: "text", text: { content: "My Dictionary" } }],
+            properties: {
+                word:           { title: {} },
+                translation:    { rich_text: {} },
+                pronounce:      { rich_text: {} },
+                part_of_speech: { rich_text: {} },
+                examples:       { rich_text: {} },
+                synonyms:       { rich_text: {} },
+                antonyms:       { rich_text: {} }
+            }
+        })
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+        if (response.status === 404) {
+            throw new Error("Page not found — open the page in Notion and add your integration as a connection first.");
+        }
+        throw new Error(friendlyNotionError(response.status, data.message || ""));
+    }
+    return data.id;
+}
+
 // watch for messages from content.js
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "saveWord") {
         saveWord(request.word).then(sendResponse);
+        return true;
+    }
+    if (request.action === "createDatabase") {
+        createDatabase(request.notionToken, request.pageId)
+            .then(id => sendResponse({ success: true, databaseId: id }))
+            .catch(err => sendResponse({ success: false, error: err.message }));
         return true;
     }
 });

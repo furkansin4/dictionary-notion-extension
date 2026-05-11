@@ -261,6 +261,32 @@
       background: #fff1f2;
     }
 
+    .lang-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #fff;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 9px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+    }
+
+    .lang-row select {
+      border: none;
+      outline: none;
+      font-size: 12px;
+      color: #475569;
+      background: transparent;
+      cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      text-align: right;
+    }
+
+    .lang-row select:focus {
+      color: #6366f1;
+    }
+
     .divider {
       height: 1px;
       background: #e2e8f0;
@@ -281,6 +307,59 @@
 
     .hint a:hover {
       text-decoration: underline;
+    }
+
+    .create-db-toggle {
+      display: block;
+      margin: 10px auto 0;
+      background: none;
+      border: none;
+      font-size: 11px;
+      color: #6366f1;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 0;
+    }
+
+    .create-db-section {
+      margin-top: 12px;
+      padding: 14px;
+      background: #f8fafc;
+      border: 1.5px dashed #e2e8f0;
+      border-radius: 10px;
+    }
+
+    .create-db-section .field {
+      margin-bottom: 10px;
+    }
+
+    .create-db-btn {
+      width: 100%;
+      padding: 9px;
+      background: #6366f1;
+      color: #fff;
+      border: none;
+      border-radius: 9px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .create-db-btn:hover {
+      background: #4f46e5;
+    }
+
+    .create-db-btn:disabled {
+      background: #a5b4fc;
+      cursor: not-allowed;
+    }
+
+    .create-msg {
+      font-size: 11.5px;
+      margin-top: 8px;
+      display: none;
+      text-align: center;
     }
 
   </style>
@@ -323,6 +402,20 @@
       Need help? <a href="https://www.notion.so/my-integrations" target="_blank">Create an integration</a> on Notion.<br>
       Then open your database as full page and <a href="https://developers.notion.com/guides/get-started/quick-start#give-your-connection-page-permissions" target="_blank">add your integration</a> as a connection.
     </p>
+
+    <button class="create-db-toggle" id="create-db-toggle">Don't have a database? Create one automatically.</button>
+
+    <div class="create-db-section" id="create-db-section" style="display:none">
+      <p class="hint" style="margin-bottom:10px;">
+        Open the target page in Notion, click <strong>···</strong> → <strong>Connections</strong>, and add your integration before creating.
+      </p>
+      <div class="field">
+        <label>Parent Page</label>
+        <input type="text" id="page-id-input" placeholder="Notion page URL or ID" />
+      </div>
+      <button class="create-db-btn" id="create-db-btn">Create Database</button>
+      <p class="create-msg" id="create-msg"></p>
+    </div>
   </div>
 
   <!-- CONNECTED VIEW -->
@@ -354,6 +447,31 @@
           <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/>
         </svg>
       </button>
+    </div>
+
+    <div class="lang-row">
+      <div>
+        <span class="credential-label">Translation Language</span>
+        <span class="credential-value" id="display-lang">Turkish</span>
+      </div>
+      <select id="target-lang-select" title="Target translation language">
+        <option value="">No translation</option>
+        <option value="tr">Turkish</option>
+        <option value="es">Spanish</option>
+        <option value="fr">French</option>
+        <option value="de">German</option>
+        <option value="it">Italian</option>
+        <option value="pt">Portuguese</option>
+        <option value="ru">Russian</option>
+        <option value="zh">Chinese</option>
+        <option value="ja">Japanese</option>
+        <option value="ko">Korean</option>
+        <option value="ar">Arabic</option>
+        <option value="nl">Dutch</option>
+        <option value="pl">Polish</option>
+        <option value="sv">Swedish</option>
+        <option value="uk">Ukrainian</option>
+      </select>
     </div>
 
     <button class="reset-btn" id="reset-btn">Disconnect</button>

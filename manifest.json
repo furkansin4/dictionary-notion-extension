@@ -11,6 +11,7 @@
   "host_permissions": [
       "https://api.notion.com/*",
       "https://api.dictionaryapi.dev/*",
+      "https://api.mymemory.translated.net/*",
       "<all_urls>"
   ],
   "background": {
