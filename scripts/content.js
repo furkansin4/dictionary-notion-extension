@@ -143,42 +143,46 @@ document.addEventListener("mouseup", function (e) {
     const range = selection.getRangeAt(0);
     const rect = range.getBoundingClientRect();
 
-    const notionIconUrl = chrome.runtime.getURL("images/edit.png");
+    const notionIconUrl = chrome.runtime.getURL("images/bookmark.png");
     const dictIconUrl = chrome.runtime.getURL("images/dictionary.png");
 
     // Container
     actionButton = document.createElement("div");
     actionButton.style.cssText = `
         position: absolute;
-        top: ${window.scrollY + rect.top - 52}px;
-        left: ${window.scrollX + rect.left + rect.width / 2 - 48}px;
+        top: ${window.scrollY + rect.top - 56}px;
+        left: ${window.scrollX + rect.left + rect.width / 2 - 46}px;
         z-index: 999999;
         display: flex;
         gap: 2px;
         align-items: center;
-        background: #ced7df;
-        border: 1px solid #e2e8f0;
-        border-radius: 10px;
-        padding: 4px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06);
+        background: #ffffff;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 12px;
+        padding: 5px;
+        box-shadow: 0 6px 24px rgba(0,0,0,0.13), 0 2px 6px rgba(0,0,0,0.07);
+        opacity: 0;
+        transform: translateY(-5px) scale(0.94);
+        transition: opacity 0.15s ease, transform 0.15s ease;
     `;
 
     function createIconButton(iconUrl, label) {
         const btn = document.createElement("button");
         btn.title = label;
         btn.style.cssText = `
-            width: 34px;
-            height: 34px;
+            width: 36px;
+            height: 36px;
             background: transparent;
             border: none;
-            border-radius: 7px;
+            border-radius: 8px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background 0.15s;
+            transition: background 0.12s ease, transform 0.12s ease;
             padding: 0;
             flex-shrink: 0;
+            outline: none;
         `;
         const img = document.createElement("img");
         img.src = iconUrl;
@@ -191,10 +195,18 @@ document.addEventListener("mouseup", function (e) {
         `;
         btn.appendChild(img);
         btn.addEventListener("mouseenter", () => {
-            btn.style.background = "#f1f5f9";
+            btn.style.background = "#f4f4f5";
+            btn.style.transform = "scale(1.1)";
         });
         btn.addEventListener("mouseleave", () => {
             btn.style.background = "transparent";
+            btn.style.transform = "scale(1)";
+        });
+        btn.addEventListener("mousedown", () => {
+            btn.style.transform = "scale(0.94)";
+        });
+        btn.addEventListener("mouseup", () => {
+            btn.style.transform = "scale(1.1)";
         });
         return btn;
     }
@@ -202,10 +214,11 @@ document.addEventListener("mouseup", function (e) {
     const divider = document.createElement("div");
     divider.style.cssText = `
         width: 1px;
-        height: 20px;
-        background: #e2e8f0;
+        height: 18px;
+        background: rgba(0, 0, 0, 0.1);
         flex-shrink: 0;
-        margin: 0 2px;
+        margin: 0 3px;
+        border-radius: 1px;
     `;
 
     const notionBtn = createIconButton(notionIconUrl, "Save to Notion");
@@ -238,6 +251,11 @@ document.addEventListener("mouseup", function (e) {
     actionButton.appendChild(divider);
     actionButton.appendChild(cambridgeBtn);
     document.body.appendChild(actionButton);
+
+    requestAnimationFrame(() => {
+        actionButton.style.opacity = "1";
+        actionButton.style.transform = "translateY(0) scale(1)";
+    });
 });
 
 document.addEventListener("mousedown", function (e) {

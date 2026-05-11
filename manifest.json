@@ -5,7 +5,7 @@
   "description": "Save dictionary definitions of selected words to Notion using https://dictionaryapi.dev/",
   "permissions": ["activeTab", "scripting", "storage"],
   "action": {
-    "default_icon": "images/dictionary.png",
+    "default_icon": "images/extension_icon.png",
     "default_popup": "popup.html"
   },
   "host_permissions": [
