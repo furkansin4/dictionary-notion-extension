@@ -8,19 +8,11 @@ async function fetchTranslation(word, targetLang) {
     if (!targetLang) return "";
     try {
         const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(word.trim())}&langpair=en%7C${targetLang}`;
-        console.log("[Translation] Fetching:", url);
         const response = await fetch(url);
-        if (!response.ok) {
-            console.error("[Translation] HTTP error:", response.status);
-            return "";
-        }
+        if (!response.ok) return "";
         const json = await response.json();
-        console.log("[Translation] Response:", json);
-        const translatedText = json.responseData?.translatedText ?? "";
-        console.log("[Translation] Result:", translatedText);
-        return translatedText;
+        return json.responseData?.translatedText ?? "";
     } catch (err) {
-        console.error("[Translation] Fetch failed:", err);
         return "";
     }
 }
@@ -67,7 +59,6 @@ async function fetchWord(word) {
             antonyms: [...new Set(antonyms)].join(", ")
         };
     } catch (error) {
-        console.error(`Couldn't find "${word}".`, error.message);
         return null;
     }
 }
@@ -154,7 +145,6 @@ async function addWord(properties, notionToken, databaseId) {
     
     const data = await response.json();
     if (!response.ok) {
-        console.error('Notion API error:', data);
         throw new Error(friendlyNotionError(response.status, data.message || ""));
     }
     return data;

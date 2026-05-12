@@ -1,18 +1,26 @@
 {
   "manifest_version": 3,
-  "name": "Dictionary Extension",
+  "name": "NotionDictionary",
   "version": "1.0",
   "description": "Save dictionary definitions of selected words to Notion using https://dictionaryapi.dev/",
   "permissions": ["activeTab", "scripting", "storage"],
+  "icons": {
+    "16": "images/icon16.png",
+    "48": "images/icon48.png",
+    "128": "images/icon128.png"
+  },
   "action": {
-    "default_icon": "images/extension_icon.png",
+    "default_icon": {
+      "16": "images/icon16.png",
+      "48": "images/icon48.png",
+      "128": "images/icon128.png"
+    },
     "default_popup": "popup.html"
   },
   "host_permissions": [
       "https://api.notion.com/*",
       "https://api.dictionaryapi.dev/*",
-      "https://api.mymemory.translated.net/*",
-      "<all_urls>"
+      "https://api.mymemory.translated.net/*"
   ],
   "background": {
       "service_worker": "scripts/background.js"
