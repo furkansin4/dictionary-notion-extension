@@ -2,7 +2,8 @@
   "manifest_version": 3,
   "name": "NotionDictionary",
   "version": "1.0",
-  "description": "Save dictionary definitions of selected words to Notion using https://dictionaryapi.dev/",
+  "description": "Select any word on any webpage and save it to your Notion vocabulary database — complete with definition, pronunciation, synonyms, antonyms, and translation.",
+  "homepage_url": "https://github.com/furkansina/dictionary_extension",
   "permissions": ["activeTab", "scripting", "storage"],
   "icons": {
     "16": "images/icon16.png",
